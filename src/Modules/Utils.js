@@ -10,7 +10,9 @@ const formatColor = function (string) {
     const processNestedColors = (input) => {
         const regex = /(\w+|#[0-9A-Fa-f]{3,6})\{([^{}]*)\}/g;
         let hasNestedMatch = false;
-
+        if (typeof input !== "string") {
+            throw new Error(`Expected a string, but received: ${typeof input}`);
+        }
         const formattedString = input.replace(regex, (match, color, text) => {
             hasNestedMatch = true;
 
