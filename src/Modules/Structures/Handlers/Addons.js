@@ -22,7 +22,7 @@ export class AddonHandler {
 
     this.manager = manager;
     this.addonDir = addonDir;
-    this.addonDirFiles = readdirSync(addonDir).filter((x) => x.endsWith(".js"));
+    this.addonDirFiles = readdirSync(addonDir)
 
     return this;
   }
@@ -38,29 +38,21 @@ export class AddonHandler {
         path.join(this.addonDir, this.addonDirFiles[i])
       ).isDirectory();
 
-      if (isDir) {
-        const dirFiles = readdirSync(
-          path.join(this.addonDir, this.addonDirFiles[i])
-        ).filter((x) => x.endsWith(".js"));
-        await this.initialize(dirFiles);
-      } else {
-        const { default: addon } = await import(
-          `file://` + path.join(this.addonDir, this.addonDirFiles[i])
-        );
+      const { default: addon } = await import(
+        `file://` + path.join(this.addonDir, this.addonDirFiles[i], isDir ? "index.js" : "")
+      );
 
-        try {
-          await addon.execute(this.manager);
-          if (addon.log)
-            console.log(chalk.yellowBright.bold("[ADDON]"), ...addon.log);
-        } catch (e) {
-          Utils.logger.error(
-            `An error has occurred executing '${addon.name}' addon!`
-          );
-          Utils.logger.error(e);
-        }
-
-        this.manager.addons.set(addon.name, addon);
+      try {
+        await addon.validate()
+        await addon.execute(this.manager);
+        if (addon.log)
+          addon.log.map(text => Utils.logger.addon(text))
+      } catch (e) {
+        Utils.logger.error(`An error has occurred executing red_bold{${addon.name}} addon!`);
+        Utils.logger.error(e.toString());
       }
+
+      this.manager.addons.set(addon.name, addon);
     }
 
     return this;
@@ -70,17 +62,68 @@ export class AddonHandler {
 export class Addon {
   /** @type {string} */ name;
   /** @type {string} */ version;
-  /** @type {(manager: BryanBot) => any} */ execute = () => {};
+  /** @type {(manager: BryanBot) => any} */ execute = () => { };
   /** @type {Array<string> | undefined} */ log;
   /** @type {Object | undefined} */ addonConfigs;
 
+
   /** @param {string} name @param {string} version */
   constructor(name, version) {
+    if (!name)
+      throw new Error("[AddonHandler] Missing name parameter for addon.");
+
     this.name = name;
-    this.version = version;
+    this.version = version || "1.0";
+    this.developer = {
+      name: null,
+      discord: null,
+      docs: null,
+      additional: null,
+    };
 
     return this;
   }
+
+  /**
+   * Set the developer's name
+   * @param {string} developerName
+   * @returns {Addon} - Allows method chaining
+   */
+  setDeveloper(developerName) {
+    this.developer.name = developerName;
+    return this;
+  }
+
+  /**
+   * Set the Discord link or any general link
+   * @param {string} link
+   * @returns {Addon} - Allows method chaining
+   */
+  setDiscord(link) {
+    this.developer.discord = link;
+    return this;
+  }
+
+  /**
+   * Set the documentation link
+   * @param {string} link
+   * @returns {Addon} - Allows method chaining
+   */
+  setDocs(link) {
+    this.developer.docs = link;
+    return this;
+  }
+
+  /**
+   * Set additional text or notes
+   * @param {string} text
+   * @returns {Addon} - Allows method chaining
+   */
+  setAdditional(text) {
+    this.developer.additional = text;
+    return this;
+  }
+
   /** @param {(manager: BryanBot) => any} execute */
   setExecute(execute) {
     this.execute = execute;
@@ -118,5 +161,26 @@ export class Addon {
     }
 
     return returnConfigValue;
+  }
+
+  /**
+   * Validate required fields are set before execution
+   */
+  validate() {
+    if (!this.name || typeof this.name !== "string") {
+      throw new Error(
+        `The addon "${this.name || "unknown"}" has an invalid name.`
+      );
+    }
+    if (!this.developer.name) {
+      throw new Error(
+        `The addon red_bold{${this.name}} is missing the developer's name. Use green{.setDeveloper(name)} to declare it.`
+      );
+    }
+    if (!this.execute) {
+      throw new Error(
+        `Addon "${this.name}" is missing the execute function. Use setExecute() to define it.`
+      );
+    }
   }
 }
