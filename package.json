@@ -2,10 +2,10 @@
   "name": "bryanbot",
   "version": "2.0.0",
   "description": "A modular Discord bot for your server management needs.",
-  "homepage": "https://github.com/59L/BrayanBot#readme",
+  "homepage": "https://github.com/BryanBotDev/BryanBot#readme",
   "author": {
-    "name": "59L",
-    "url": "https://github.com/59L"
+    "name": "BryanBotDev",
+    "url": "https://github.com/BryanBotDev"
   },
   "license": "GPL-3.0-only",
   "main": "src/index.js",
@@ -22,7 +22,7 @@
     "start": "node src/index.js"
   },
   "bugs": {
-    "url": "https://github.com/59L/BrayanBot/issues"
+    "url": "https://github.com/BryanBotDev/BryanBot/issues"
   },
   "engines": {
     "node": ">=16.15.0"

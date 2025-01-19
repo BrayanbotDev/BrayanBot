@@ -63,5 +63,5 @@ There's a fly in your room? Found a command that nukes your entire operating sys
 ## Our Awesome Contributors
 
 <a href="https://github.com/BryanBotDev/BryanBot/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=59L/BrayanBot" height="50" />
+  <img src="https://contrib.rocks/image?repo=BryanBotDev/BryanBot" height="50" />
 </a>

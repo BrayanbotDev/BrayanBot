@@ -45,7 +45,7 @@ const defaultConfig = {
           {
             Name: "📖 Open Source",
             Value:
-              "> This bot's base is open source, you can find the source code [here](https://github.com/59L/BrayanBot).",
+              "> This bot's base is open source, you can find the source code [here](https://github.com/BryanBotDev/BryanBot).",
           },
           {
             Name: "⚡ Blazing fast!",
@@ -100,7 +100,7 @@ const defaultConfig = {
                 Name: "• Information",
                 Value: [
                   "> [**BryanBot's Website**]({brand-link})",
-                  "> [**BryanBot's GitHub**](https://github.com/59L/BrayanBot)",
+                  "> [**BryanBot's GitHub**](https://github.com/BryanBotDev/BryanBot)",
                   "> [**BryanBot's Discord**](https://discord.gg/GvyuDDFeZU)",
                 ].join("\n"),
               },

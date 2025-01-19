@@ -58,7 +58,7 @@ const defaultConfig = {
   Branding: {
     Name: "BryanBot",
     Color: "#2f3136",
-    Link: "https://github.com/59L/BrayanBot",
+    Link: "https://github.com/BryanBotDev/BryanBot",
     Logo: "https://i.imgur.com/ptTG24J.png",
   },
   "~l1": "Empty Line",
@@ -73,7 +73,7 @@ const defaultConfig = {
       {
         Type: "STREAMING",
         Text: "BryanBot",
-        URL: "https://github.com/59L/BrayanBot",
+        URL: "https://github.com/BryanBotDev/BryanBot",
       },
       {
         Type: "LISTENING",

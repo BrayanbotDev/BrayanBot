@@ -51,7 +51,7 @@ const setupMessage = (settings) => {
       {
         searchFor: /{brand-link}/g,
         replaceWith:
-          manager.configs.config?.Branding.Link || "https://github.com/59L/BrayanBot",
+          manager.configs.config?.Branding.Link || "https://github.com/BryanBotDev/BryanBot",
       },
       {
         searchFor: /{brand-logo}/g,
