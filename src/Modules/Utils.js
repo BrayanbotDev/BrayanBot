@@ -3,6 +3,7 @@ import { botVariables, channelVariables, guildVariables, roleVariables, userVari
 import { setupSlashCommand } from "./Utils/setupSlashCommand.js";
 import { setupMessage } from "./Utils/setupMessage.js";
 import { loadCommands } from "./Utils/loadCommands.js";
+import { setupModal } from "./Utils/setupModal.js";
 import chalk from "chalk";
 
 // test
@@ -58,7 +59,8 @@ export default {
     loadCommands: loadCommands,
     setupMessage: setupMessage,
     setupSlashCommand: setupSlashCommand,
-
+    setupModal: setupModal,
+    
     createVariable: createVariable,
     botVariables: botVariables,
     userVariables: userVariables,
@@ -109,7 +111,7 @@ export default {
      * @param {Boolean} notify 
      * @returns {GuildMember | undefined}
      */
-    findMember(guild, name, notify = false) {
+    findMember(guild, name, notify = true) {
         const memberName = typeof name === "number" ? name.toString() : name;
         const member = guild.members.cache.find((m) => {
             return m.user.tag.toLowerCase() === memberName.toLowerCase() || m.id.toLowerCase() === memberName.toLowerCase() || m.user.username.toLowerCase() === memberName.toLowerCase();
@@ -121,20 +123,26 @@ export default {
 
         return member;
     },
-
     /**
-     * @param {ChannelType} type 
-     * @param {Guild} guild 
-     * @param {String} name 
-     * @param {Boolean} notify 
-     * @returns {TextChannel | VoiceChannel | DMChannel | CategoryChannel | undefined}
+     * Finds a channel by type, guild, and name.
+     * Redirects to `findTextChannel` or `findVoiceChannel` as needed.
+     * @param {string} type - The type of the channel (e.g., "text", "voice", etc.).
+     * @param {Guild} guild - The guild where the channel is located.
+     * @param {string | number} name - The name or ID of the channel to search for.
+     * @param {boolean} [notify=true] - Whether to log an error if the channel is not found.
+     * @param {boolean} [ignoreCase=true] - Whether to ignore case when comparing channel names.
+     * @returns {TextChannel | VoiceChannel | NewsChannel | ThreadChannel | StageChannel | undefined} - The found channel or `undefined` if not found.
      */
-    findChannel(type, guild, name, notify = false) {
+    findChannel(type, guild, name, notify = true, ignoreCase = true) {
         if (typeof name === "number") name = name.toString();
         const channels = guild.channels.cache.filter(channel => channel.type === type);
         const channel = channels.find(ch => ch.name === name || ch.id === name);
 
         switch (type) {
+            case "text":
+                return this.findTextChannel(guild, name, notify);
+            case "voice":
+                return this.findVoiceChannel(guild, name, notify, ignoreCase);
             case ChannelType.GuildText:
                 return channel instanceof TextChannel ? channel : undefined;
             case ChannelType.GuildVoice:
@@ -148,6 +156,55 @@ export default {
             default:
                 if (notify) this.logger.error(`The ${chalk.bold(ChannelType[type].toString())} channel named "${chalk.bold(name)}" could not be found in the "${chalk.bold(guild.name)}" server. Please check the channel name and its type and try again.`);
         }
+    },
+    /**
+     * Finds a text-based channel in the guild.
+     * @param {Guild} guild - The guild to search in.
+     * @param {String} name - The name or ID of the channel.
+     * @param {Boolean} [notify=true] - Whether to log an error if the channel is not found.
+     * @returns {TextChannel | NewsChannel | ThreadChannel | undefined}
+     */
+    findTextChannel(guild, name, notify = true) {
+        if (typeof name === "number") name = name.toString();
+
+        const channel = guild.channels.cache.find(
+            ch => (ch.isTextBased() && (ch.name === name.toLowerCase() || ch.id === name))
+        );
+
+        if (channel) {
+            return channel;
+        } else if (notify) {
+            this.logger.error(
+                `The text-based channel named "bold{${name}}" could not be found in the "bold{${guild.name}}" server.`
+            );
+        }
+
+        return undefined;
+    },
+    /**
+     * Finds a voice-based channel in the guild.
+     * @param {Guild} guild - The guild to search in.
+     * @param {String} name - The name or ID of the channel.
+     * @param {Boolean} [notify=true] - Whether to log an error if the channel is not found.
+     * @param {Boolean} ignoreCase - Specifies whether or not the matching should be case-sensitive. 
+     * @returns {VoiceChannel | StageChannel | undefined}
+     */
+    findVoiceChannel(guild, name, notify = true, ignoreCase = true) {
+        if (typeof name === "number") name = name.toString();
+
+        const channel = guild.channels.cache.find(
+            ch => (ch.isVoiceBased() && (ignoreCase ? ch.name.toLowerCase() === name.toLowerCase() : ch.name === name || ch.id === name))
+        );
+
+        if (channel) {
+            return channel;
+        } else if (notify) {
+            this.logger.error(
+                `The voice-based channel named "bold{${name}}" could not be found in the "bold{${guild.name}}" server.`
+            );
+        }
+
+        return undefined;
     },
     /**
      * @param {[String]} permissions Array of role names or IDs
